@@ -7,6 +7,11 @@
 <meta property="og:title" content="Flavor South Florida 2026, Decoded">
 <meta property="og:description" content="Every Flavor menu priced against the regular menu. Sept 1–30 · Palm Beach County & Treasure Coast.">
 <meta property="og:type" content="website">
+<meta property="og:url" content="https://saversouthflorida.pages.dev/">
+<meta property="og:site_name" content="FSF Decoded">
+<link rel="canonical" href="https://saversouthflorida.pages.dev/">
+<meta name="theme-color" content="#f9f9f7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0d0d0d" media="(prefers-color-scheme: dark)">
 <meta name="description" content="Every Flavor South Florida 2026 prix-fixe menu priced against the restaurant's regular menu — verdicts, savings, and the exact order that wins. Sept 1–30.">
 <style>
 :root{
@@ -103,7 +108,7 @@ footer{color:var(--muted);font-size:.78rem;margin:26px 0 40px;border-top:1px sol
 <body>
 <div class="wrap">
 <header>
-  <button class="toggle" onclick="tgl()">◐ theme</button>
+  <button class="toggle" aria-label="Toggle light or dark theme" onclick="tgl()">◐ theme</button>
   <h1>Flavor South Florida 2026, Decoded</h1>
   <p>Every prix-fixe dish priced against the restaurant's regular menu — so you know where the real savings are before you book. Sept 1–30 · Palm Beach County &amp; Treasure Coast.</p>
   <p style="font-size:.78rem">Unofficial &amp; independent — not affiliated with Flavor South Florida or any restaurant. Prices before tax &amp; tip, verified Aug 2026, change without notice.</p>
@@ -137,7 +142,7 @@ footer{color:var(--muted);font-size:.78rem;margin:26px 0 40px;border-top:1px sol
 <footer>
   <b>How verdicts work.</b> For each menu we match every prix-fixe dish to the restaurant's regular menu (exact name, or ≈ a clearly-same dish adjudicated under strict rules — same protein and preparation). Matched dishes give each menu a best-case combo (priciest matched pick per course) and worst-case combo (cheapest). Worth it however you order = even the worst combo beats the prix-fixe price. Order right = only some combos win. Skip = even the best combo loses. Dishes not on the regular menu are shown as "not priced" and excluded — never estimated. Menus with too little price data are labeled unpriced, not scored. Delivery-platform-sourced prices (flagged) run ~9–10% above dine-in, so those menus never earn the top badge. Distances are approximate (zip-code centers). Every restaurant links its price source and date.
   <br><br>Prices before tax &amp; tip. Prix-fixe portions may differ from à la carte. Unofficial &amp; independent — not affiliated with Flavor South Florida or any restaurant.
-  <br><br>Built with Claude. Data: Flavor South Florida published menus + each restaurant's published regular prices.
+  <br><br>v4.1 · updated Aug 13, 2026. Built with Claude. Data: Flavor South Florida published menus + each restaurant's published regular prices.
 </footer>
 </div>
 <div class="toast" id="toast"></div>
@@ -276,7 +281,7 @@ function actions(g, d){
 function mapBtn(g,d){
   const name = encodeURIComponent(g.restaurant);
   const addr = encodeURIComponent(d.address || (g.city+", FL"));
-  return `<span class="mapwrap"><button class="abtn" onclick="event.stopPropagation();mapPop(this)">📍 Maps</button>
+  return `<span class="mapwrap"><button class="abtn" aria-label="Open in a maps app" aria-haspopup="true" onclick="event.stopPropagation();mapPop(this)">📍 Maps</button>
   <span class="mappop">
     <a href="https://maps.apple.com/?q=${name}&address=${addr}" target="_blank" rel="noopener" onclick="event.stopPropagation()">Apple Maps</a>
     <a href="https://www.google.com/maps/search/?api=1&query=${name}%20${addr}" target="_blank" rel="noopener" onclick="event.stopPropagation()">Google Maps</a>
@@ -284,7 +289,7 @@ function mapBtn(g,d){
   </span></span>`;
 }
 function shareBtn(g){
-  return `<button class="abtn" onclick="event.stopPropagation();shareCard('${g.slug}')">↗ Share</button>`;
+  return `<button class="abtn" aria-label="Share link to ${esc(g.restaurant)}" onclick="event.stopPropagation();shareCard('${g.slug}')">↗ Share</button>`;
 }
 function mapPop(btn){
   const pop = btn.nextElementSibling, was = pop.classList.contains("open");
@@ -297,7 +302,17 @@ function shareCard(slug){
   const url = location.origin + location.pathname + "#" + slug;
   const payload = {title: g.restaurant + " — FSF Decoded", url};
   if (navigator.share){ navigator.share(payload).catch(()=>{}); return; }
-  navigator.clipboard.writeText(url).then(()=>toastMsg("Link copied"));
+  const legacy = () => {
+    try {
+      const ta = document.createElement("textarea");
+      ta.value = url; ta.style.position = "fixed"; ta.style.opacity = "0";
+      document.body.appendChild(ta); ta.select(); document.execCommand("copy"); ta.remove();
+      toastMsg("Link copied");
+    } catch(e){ toastMsg(url); }
+  };
+  if (navigator.clipboard && navigator.clipboard.writeText)
+    navigator.clipboard.writeText(url).then(()=>toastMsg("Link copied")).catch(legacy);
+  else legacy();
 }
 function toastMsg(t){
   const el = document.getElementById("toast");
